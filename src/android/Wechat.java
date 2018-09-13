@@ -634,6 +634,12 @@ public class Wechat extends CordovaPlugin {
         return appId;
     }
 
+    public static String getAppid() {
+
+
+        return appId;
+    }
+
     /**
      * Get saved app id
      * @param ctx
