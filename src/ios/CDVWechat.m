@@ -14,7 +14,7 @@ static int const MAX_THUMBNAIL_SIZE = 320;
 
 #pragma mark "API"
 - (void)pluginInitialize {
-    NSString* appId = [[self.commandDelegate settings] objectForKey:@"wechatappid"];
+    NSString* appId = [[self.commandDelegate settings] objectForKey:@"WECHATAPPID"];
 
     if (appId && ![appId isEqualToString:self.wechatAppId]) {
         self.wechatAppId = appId;
@@ -113,16 +113,18 @@ static int const MAX_THUMBNAIL_SIZE = 320;
     {
         req.state = [command.arguments objectAtIndex:1];
     }
-
-    if ([WXApi sendAuthReq:req viewController:self.viewController delegate:self])
-    {
-        // save the callback id
-        self.currentCallbackId = command.callbackId;
-    }
-    else
-    {
-        [self failWithCallbackID:command.callbackId withMessage:@"发送请求失败"];
-    }
+    [self.commandDelegate runInBackground:^{
+        if ([WXApi sendAuthReq:req viewController:self.viewController delegate:self])
+        {
+            // save the callback id
+            self.currentCallbackId = command.callbackId;
+        }
+        else
+        {
+            [self failWithCallbackID:command.callbackId withMessage:@"发送请求失败"];
+        }
+    }];
+    
 }
 
 - (void)sendPaymentRequest:(CDVInvokedUrlCommand *)command
@@ -169,16 +171,19 @@ static int const MAX_THUMBNAIL_SIZE = 320;
     req.nonceStr = [params objectForKey:requiredParams[3]];
     req.package = @"Sign=WXPay";
     req.sign = [params objectForKey:requiredParams[4]];
-
-    if ([WXApi sendReq:req])
-    {
-        // save the callback id
-        self.currentCallbackId = command.callbackId;
-    }
-    else
-    {
-        [self failWithCallbackID:command.callbackId withMessage:@"发送请求失败"];
-    }
+    
+    [self.commandDelegate runInBackground:^{
+        if ([WXApi sendReq:req])
+        {
+            // save the callback id
+            self.currentCallbackId = command.callbackId;
+        }
+        else
+        {
+            [self failWithCallbackID:command.callbackId withMessage:@"发送请求失败"];
+        }
+    }];
+  
 }
 - (void)chooseInvoiceFromWX:(CDVInvokedUrlCommand *)command
 {
