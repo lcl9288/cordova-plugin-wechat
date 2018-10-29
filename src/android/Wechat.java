@@ -47,7 +47,7 @@ public class Wechat extends CordovaPlugin {
     public static final String TAG = "Cordova.Plugin.Wechat";
 
     public static final String PREFS_NAME = "Cordova.Plugin.Wechat";
-    public static final String WXAPPID_PROPERTY_KEY = "wechatappid";
+    public static final String WECHATAPPID = "WECHATAPPID";
 
     public static final String ERROR_WECHAT_NOT_INSTALLED = "未安装微信";
     public static final String ERROR_INVALID_PARAMETERS = "参数格式错误";
@@ -250,19 +250,30 @@ public class Wechat extends CordovaPlugin {
             req.state = "wechat";
         }
 
-        if (api.sendReq(req)) {
+      cordova.getThreadPool().execute(new Runnable() {
+
+        @Override
+        public void run() {
+          if (api.sendReq(req)) {
             Log.i(TAG, "Auth request has been sent successfully.");
 
             // send no result
             sendNoResultPluginResult(callbackContext);
-        } else {
+          } else {
             Log.i(TAG, "Auth request has been sent unsuccessfully.");
 
             // send error
             callbackContext.error(ERROR_SEND_REQUEST_FAILED);
-        }
+          }
 
-        return true;
+        }
+      });
+
+      sendNoResultPluginResult(callbackContext);
+
+      return true;
+
+
     }
 
     protected boolean sendPaymentRequest(CordovaArgs args, CallbackContext callbackContext) {
@@ -285,7 +296,7 @@ public class Wechat extends CordovaPlugin {
 //                this.saveAppId(cordova.getActivity(), appid);
 //            }
 
-//            req.appId = appid;
+            req.appId = getAppId();
             req.partnerId = params.has("mch_id") ? params.getString("mch_id") : params.getString("partnerid");
             req.prepayId = params.has("prepay_id") ? params.getString("prepay_id") : params.getString("prepayid");
             req.nonceStr = params.has("nonce") ? params.getString("nonce") : params.getString("noncestr");
@@ -299,21 +310,30 @@ public class Wechat extends CordovaPlugin {
             return true;
         }
 
-        final IWXAPI api = getWxAPI(cordova.getActivity());
+      cordova.getThreadPool().execute(new Runnable() {
 
-        if (api.sendReq(req)) {
+        @Override
+        public void run() {
+          final IWXAPI api = getWxAPI(cordova.getActivity());
+
+          if (api.sendReq(req)) {
             Log.i(TAG, "Payment request has been sent successfully.");
 
             // send no result
             sendNoResultPluginResult(callbackContext);
-        } else {
+          } else {
             Log.i(TAG, "Payment request has been sent unsuccessfully.");
 
             // send error
             callbackContext.error(ERROR_SEND_REQUEST_FAILED);
-        }
+          }
 
-        return true;
+        }
+      });
+      sendNoResultPluginResult(callbackContext);
+
+      return true;
+
     }
 
    protected boolean chooseInvoiceFromWX(CordovaArgs args, CallbackContext callbackContext) {
