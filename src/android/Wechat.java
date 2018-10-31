@@ -47,7 +47,7 @@ public class Wechat extends CordovaPlugin {
     public static final String TAG = "Cordova.Plugin.Wechat";
 
     public static final String PREFS_NAME = "Cordova.Plugin.Wechat";
-    public static final String WECHATAPPID = "WECHATAPPID";
+    public static final String WECHATAPPID = "wxappid";
 
     public static final String ERROR_WECHAT_NOT_INSTALLED = "未安装微信";
     public static final String ERROR_INVALID_PARAMETERS = "参数格式错误";
