@@ -14,11 +14,11 @@ static int const MAX_THUMBNAIL_SIZE = 320;
 
 #pragma mark "API"
 - (void)pluginInitialize {
-    NSString* appId = [[self.commandDelegate settings] objectForKey:@"wxappid"];
+    NSString* appId = [[self.commandDelegate settings] objectForKey:@"wechatappid"];
 
     if (appId && ![appId isEqualToString:self.wechatAppId]) {
         self.wechatAppId = appId;
-//        [WXApi registerApp: appId];
+        [WXApi registerApp: appId];
         
         NSLog(@"cordova-plugin-wechat has been initialized. Wechat SDK Version: %@. APP_ID: %@.", [WXApi getApiVersion], appId);
     }
@@ -113,19 +113,16 @@ static int const MAX_THUMBNAIL_SIZE = 320;
     {
         req.state = [command.arguments objectAtIndex:1];
     }
-    [self.commandDelegate runInBackground:^{
-        [WXApi registerApp: self.wechatAppId];
-        if ([WXApi sendAuthReq:req viewController:self.viewController delegate:self])
-        {
-            // save the callback id
-            self.currentCallbackId = command.callbackId;
-        }
-        else
-        {
-            [self failWithCallbackID:command.callbackId withMessage:@"发送请求失败"];
-        }
-    }];
-    
+
+    if ([WXApi sendAuthReq:req viewController:self.viewController delegate:self])
+    {
+        // save the callback id
+        self.currentCallbackId = command.callbackId;
+    }
+    else
+    {
+        [self failWithCallbackID:command.callbackId withMessage:@"发送请求失败"];
+    }
 }
 
 - (void)sendPaymentRequest:(CDVInvokedUrlCommand *)command
@@ -163,7 +160,7 @@ static int const MAX_THUMBNAIL_SIZE = 320;
     NSString *appId = [params objectForKey:requiredParams[5]];
     if (appId && ![appId isEqualToString:self.wechatAppId]) {
         self.wechatAppId = appId;
-//        [WXApi registerApp: appId];
+        [WXApi registerApp: appId];
     }
 
     req.partnerId = [params objectForKey:requiredParams[0]];
@@ -172,20 +169,16 @@ static int const MAX_THUMBNAIL_SIZE = 320;
     req.nonceStr = [params objectForKey:requiredParams[3]];
     req.package = @"Sign=WXPay";
     req.sign = [params objectForKey:requiredParams[4]];
-    
-    [self.commandDelegate runInBackground:^{
-        [WXApi registerApp: self.wechatAppId];
-        if ([WXApi sendReq:req])
-        {
-            // save the callback id
-            self.currentCallbackId = command.callbackId;
-        }
-        else
-        {
-            [self failWithCallbackID:command.callbackId withMessage:@"发送请求失败"];
-        }
-    }];
-  
+
+    if ([WXApi sendReq:req])
+    {
+        // save the callback id
+        self.currentCallbackId = command.callbackId;
+    }
+    else
+    {
+        [self failWithCallbackID:command.callbackId withMessage:@"发送请求失败"];
+    }
 }
 - (void)chooseInvoiceFromWX:(CDVInvokedUrlCommand *)command
 {
